@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Address {
+  id           String   @id @default(cuid())
+  cep          String
+  state        String   // UF
+  city         String
+  neighborhood String
+  street       String
+  service      String   // origem dos dados: "viacep" | "brasilapi" | ...
+  createdAt    DateTime @default(now())
+
+  applicants   Applicant[]
+
+  @@index([cep])
+  @@index([city])
+  @@index([state])
+  // Evitar duplicatas exatas:
+  @@unique([cep, state, city, neighborhood, street, service])
+}
+
+model Applicant {
+  id        String   @id @default(cuid())
+  nome      String
+  cpf       String   @unique
+  renda     Float
+  score     Int      @default(600)
+  addressId String
+  createdAt DateTime @default(now())
+
+  address   Address  @relation(fields: [addressId], references: [id])
+  contracts Contract[]
+
+  @@index([addressId])
+}
+
+model Product {
+  id           String   @id @default(cuid())
+  nome         String
+  taxaMesBase  Float
+  minParcelas  Int
+  maxParcelas  Int
+  cetInfo      String
+  createdAt    DateTime @default(now())
+
+  contracts    Contract[]
+}
+
+model Contract {
+  id               String   @id @default(cuid())
+  applicantId      String
+  productId        String
+  valor            Float
+  parcelas         Int
+  taxaEfetivaMes   Float
+  parcelaCalculada Float
+  status           String   // "PENDENTE" | "APROVADO" | "REPROVADO"
+  createdAt        DateTime @default(now())
+
+  // Snapshot de endereço no momento da contratação:
+  addressCep          String
+  addressState        String
+  addressCity         String
+  addressNeighborhood String
+  addressStreet       String
+  addressService      String
+
+  applicant        Applicant @relation(fields: [applicantId], references: [id])
+  product          Product   @relation(fields: [productId], references: [id])
+
+  @@index([applicantId])
+  @@index([productId])
+  @@index([addressCep])
+  @@index([addressCity])
+  @@index([addressState])
+}

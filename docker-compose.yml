@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: loans-postgres
+    environment:
+      POSTGRES_DB: loans
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: loans-app
+    ports:
+      - "3005:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/loans?schema=public
+      - BRASILAPI_BASE_URL=https://brasilapi.com.br
+      - BRASILAPI_CEP_PATH=/api/cep/v2
+      - BRASILAPI_CDI_PATH=/api/taxas/v1/cdi
+      - REQUEST_TIMEOUT_MS=3000
+      - NEXTAUTH_SECRET=your-secret-key-here
+      - NEXTAUTH_URL=http://localhost:3005
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - /app/node_modules
+
+volumes:
+  postgres_data:
