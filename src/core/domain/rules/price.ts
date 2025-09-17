@@ -48,3 +48,22 @@ export function calcJuros(valorPrincipal: number, valorTotal: number): number {
   
   return Math.round((valorTotal - valorPrincipal) * 100) / 100;
 }
+
+/**
+ * Calcula o CET (Custo Efetivo Total) de um empréstimo
+ * @param principal Valor principal do empréstimo
+ * @param n Número de parcelas
+ * @param parcela Valor da parcela
+ * @returns CET em percentual (ex: 15.5 para 15.5%)
+ */
+export function calcularCET(principal: number, n: number, parcela: number): number {
+  if (principal <= 0) throw new Error('Principal deve ser positivo');
+  if (n <= 0) throw new Error('Número de parcelas deve ser positivo');
+  if (parcela <= 0) throw new Error('Parcela deve ser positiva');
+
+  const total = parcela * n;
+  const cet = ((total - principal) / principal) * 100;
+  
+  // Arredonda para 2 casas decimais
+  return Math.round(cet * 100) / 100;
+}

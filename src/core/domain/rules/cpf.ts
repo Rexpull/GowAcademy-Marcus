@@ -44,8 +44,11 @@ export function isValidCPF(cpf: string): boolean {
 export function formatCPF(cpf: string): string {
   if (!cpf) return '';
   
-  const cleanCpf = cpf.replace(/\D/g, '');
-  if (cleanCpf.length !== 11) return cpf;
+  // Converte para string se não for
+  const cpfStr = String(cpf);
+  
+  const cleanCpf = cpfStr.replace(/\D/g, '');
+  if (cleanCpf.length !== 11) return cpfStr;
   
   return `${cleanCpf.slice(0, 3)}.${cleanCpf.slice(3, 6)}.${cleanCpf.slice(6, 9)}-${cleanCpf.slice(9)}`;
 }
